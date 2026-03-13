@@ -1,0 +1,70 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "customerservice: kill stale process",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/src/CustomerService/.vscode/kill-customerservice.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "customerservice: build",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/CustomerService/CustomerService.csproj"
+      ],
+      "problemMatcher": [
+        "$msCompile"
+      ]
+    },
+    {
+      "label": "customerservice: prepare launch",
+      "dependsOn": [
+        "customerservice: clean environment",
+        "customerservice: build"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "customerservice: clean environment",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$ids = Get-NetTCPConnection -LocalPort 5019 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($ids) { foreach ($id in $ids) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }; sqllocaldb start mssqllocaldb | Out-Null"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "customerservice: run clean",
+      "type": "shell",
+      "dependsOn": [
+        "customerservice: prepare launch"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "dotnet run --project \"${workspaceFolder}/src/CustomerService/CustomerService.csproj\""
+      ],
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

@@ -22,6 +22,16 @@ bld/
 .vscode/
 *.code-workspace
 
+# Keep CustomerService workspace tasks/debug files visible
+!.vscode/
+!.vscode/settings.json
+!src/
+!src/CustomerService/
+!src/CustomerService/.vscode/
+!src/CustomerService/.vscode/tasks.json
+!src/CustomerService/.vscode/launch.json
+!src/CustomerService/.vscode/kill-customerservice.ps1
+
 # User-specific files
 *.rsuser
 *.suo
