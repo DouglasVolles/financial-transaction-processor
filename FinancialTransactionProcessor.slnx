@@ -1,6 +1,9 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/Services/">
-    <Project Path="src/Services/CustomerService/CustomerService.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/CustomerService/CustomerService.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CustomerService.UnitTests/CustomerService.UnitTests.csproj" />
+    <Project Path="tests/CustomerService.IntegrationTests/CustomerService.IntegrationTests.csproj" />
   </Folder>
 </Solution>
