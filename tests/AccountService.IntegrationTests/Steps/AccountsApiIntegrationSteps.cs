@@ -158,6 +158,20 @@ public sealed class AccountsApiIntegrationSteps : IDisposable
         fieldErrors.GetArrayLength().Should().BeGreaterThan(0);
     }
 
+    [Then("the response should contain validation message for field \"(.*)\" with value \"(.*)\"")]
+    public async Task ThenTheResponseShouldContainValidationMessageForFieldWithValue(string field, string message)
+    {
+        var content = await _response.Content.ReadAsStringAsync();
+        using var document = JsonDocument.Parse(content);
+
+        document.RootElement.TryGetProperty("errors", out var errors).Should().BeTrue();
+        errors.TryGetProperty(field, out var fieldErrors).Should().BeTrue();
+        fieldErrors.ValueKind.Should().Be(JsonValueKind.Array);
+
+        var values = fieldErrors.EnumerateArray().Select(x => x.GetString()).ToList();
+        values.Should().Contain(message);
+    }
+
     [Then("the queue should contain (.*) published account message")]
     public void ThenTheQueueShouldContainPublishedAccountMessage(int expectedCount)
     {

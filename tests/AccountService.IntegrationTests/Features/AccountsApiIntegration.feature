@@ -21,16 +21,40 @@ Feature: Accounts API integration
     And the response credit limit should be 10000.00
     And the response account status should be "Active"
 
-  Scenario: Add account publishes message to accounts queue
+  Scenario Outline: Add account publishes message to accounts queue
     Given the account queue is empty
-    When I send POST request to "/api/financialtransaction/accounts" with customer cpfcnpj "987.654.321-00", available balance 5000.00, reserved balance 300.00, credit limit 15000.00 and status "Active"
+    When I send POST request to "/api/financialtransaction/accounts" with customer cpfcnpj "<customerCpfCnpj>", available balance 5000.00, reserved balance 300.00, credit limit 15000.00 and status "Active"
     Then the response status code should be 200
     And the queue should contain 1 published account message
     And the last published account queue name should be "accounts"
 
-  Scenario: Add account with negative credit limit returns validation error
+    Examples:
+      | customerCpfCnpj    |
+      | 987.654.321-00     |
+      | 12.345.678/0001-95 |
+
+  Scenario Outline: Add account with negative numeric input returns validation error
     Given the account queue is empty
-    When I send POST request to "/api/financialtransaction/accounts" with customer cpfcnpj "111.222.333-44", available balance 10.00, reserved balance 0.00, credit limit -100.00 and status "Inactive"
+    When I send POST request to "/api/financialtransaction/accounts" with customer cpfcnpj "111.222.333-44", available balance <availableBalance>, reserved balance <reservedBalance>, credit limit <creditLimit> and status "Inactive"
     Then the response status code should be 400
-    And the response should contain validation error for field "CreditLimit"
+    And the response should contain validation error for field "<field>"
     And the queue should contain 0 published account message
+
+    Examples:
+      | availableBalance | reservedBalance | creditLimit | field            |
+      | 10.00            | 0.00            | -100.00     | CreditLimit      |
+      | -10.00           | 0.00            | 100.00      | AvailableBalance |
+      | 10.00            | -1.00           | 100.00      | ReservedBalance  |
+
+  Scenario Outline: Add account with invalid customer cpfcnpj returns validation error
+    Given the account queue is empty
+    When I send POST request to "/api/financialtransaction/accounts" with customer cpfcnpj "<customerCpfCnpj>", available balance 10.00, reserved balance 0.00, credit limit 100.00 and status "Inactive"
+    Then the response status code should be 400
+    And the response should contain validation error for field "CustomerCpFCnpj"
+    And the response should contain validation message for field "CustomerCpFCnpj" with value "<message>"
+    And the queue should contain 0 published account message
+
+    Examples:
+      | customerCpfCnpj        | message                                        |
+      |                        | CustomerCpFCnpj is required                    |
+      | 123456789012345678901  | CustomerCpFCnpj must be at most 20 characters  |

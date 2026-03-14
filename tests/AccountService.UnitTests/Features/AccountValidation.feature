@@ -21,7 +21,12 @@ Feature: Account request validation
     Then the account request should be invalid
     And the validation should contain error for field "AvailableBalance"
 
-  Scenario: Accept valid account data
-    Given an account request with customer cpfcnpj "123.456.789-01", available balance 2500.00, reserved balance 150.00, credit limit 10000.00 and status "Active"
+  Scenario Outline: Accept valid account data
+    Given an account request with customer cpfcnpj "<customerCpfCnpj>", available balance 2500.00, reserved balance 150.00, credit limit 10000.00 and status "Active"
     When I validate the account request
     Then the account request should be valid
+
+    Examples:
+      | customerCpfCnpj    |
+      | 123.456.789-01     |
+      | 12.345.678/0001-95 |

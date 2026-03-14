@@ -31,40 +31,47 @@ Feature: Customers API integration
     When I send GET request to "/api/financialtransaction/customers/cpfcnpj/99999999999"
     Then the response status code should be 404
 
-  Scenario: Get customer by cpfCnpj returns customer for existing cpfCnpj
-    Given the customer database has customer id 7 name "Ana" and cpfCnpj "22222222222"
-    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/22222222222"
+  Scenario Outline: Get customer by cpfCnpj returns customer for existing cpfCnpj
+    Given the customer database has customer id 7 name "Ana" and cpfCnpj "<storedCpfCnpj>"
+    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/<queryCpfCnpj>"
     Then the response status code should be 200
     And the response customer name should be "Ana"
 
-  Scenario: Get customer by formatted cpfCnpj returns customer after normalization
-    Given the customer database has customer id 7 name "Ana" and cpfCnpj "22222222222"
-    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/222.222.222-22"
+    Examples:
+      | storedCpfCnpj   | queryCpfCnpj   |
+      | 22222222222     | 22222222222    |
+      | 04252011000110  | 04252011000110 |
+
+  Scenario Outline: Get customer by formatted cpfCnpj returns customer after normalization
+    Given the customer database has customer id 7 name "Ana" and cpfCnpj "<storedCpfCnpj>"
+    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/<formattedCpfCnpj>"
     Then the response status code should be 200
     And the response customer name should be "Ana"
 
-  Scenario: Add customer publishes message through integration pipeline
+    Examples:
+      | storedCpfCnpj   | formattedCpfCnpj  |
+      | 22222222222     | 222.222.222-22    |
+      | 04252011000110  | 04.2520110001-10  |
+
+  Scenario Outline: Add customer with valid cpfcnpj publishes message through integration pipeline
     Given the customer queue is empty
-    When I send POST request to "/api/financialtransaction/customers" with name "Joao" and cpfCnpj "529.982.247-25"
+    When I send POST request to "/api/financialtransaction/customers" with name "<name>" and cpfCnpj "<cpfCnpj>"
     Then the response status code should be 200
     And the queue should contain 1 published customer message
 
-  Scenario: Add customer with valid cnpj publishes message through integration pipeline
-    Given the customer queue is empty
-    When I send POST request to "/api/financialtransaction/customers" with name "Empresa X" and cpfCnpj "04.252.011/0001-10"
-    Then the response status code should be 200
-    And the queue should contain 1 published customer message
+    Examples:
+      | name      | cpfCnpj            |
+      | Joao      | 529.982.247-25     |
+      | Empresa X | 04.252.011/0001-10 |
 
-  Scenario: Add customer with invalid cnpj returns validation error and does not publish
+  Scenario Outline: Add customer with invalid cpfcnpj returns validation error and does not publish
     Given the customer queue is empty
-    When I send POST request to "/api/financialtransaction/customers" with name "Empresa X" and cpfCnpj "04.252.011/0001-11"
+    When I send POST request to "/api/financialtransaction/customers" with name "<name>" and cpfCnpj "<cpfCnpj>"
     Then the response status code should be 400
     And the response should contain validation error for field "CpfCnpj"
     And the queue should contain 0 published customer message
 
-  Scenario: Add customer with invalid cpf returns validation error and does not publish
-    Given the customer queue is empty
-    When I send POST request to "/api/financialtransaction/customers" with name "Joao" and cpfCnpj "529.982.247-21"
-    Then the response status code should be 400
-    And the response should contain validation error for field "CpfCnpj"
-    And the queue should contain 0 published customer message
+    Examples:
+      | name      | cpfCnpj            |
+      | Empresa X | 04.252.011/0001-11 |
+      | Joao      | 529.982.247-21     |
