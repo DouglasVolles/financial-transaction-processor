@@ -26,6 +26,23 @@ Feature: Customers API integration
     Then the response status code should be 200
     And the response customer name should be "Ana"
 
+  Scenario: Get customer by cpfCnpj returns not found for unknown customer
+    Given the customer database is empty
+    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/99999999999"
+    Then the response status code should be 404
+
+  Scenario: Get customer by cpfCnpj returns customer for existing cpfCnpj
+    Given the customer database has customer id 7 name "Ana" and cpfCnpj "22222222222"
+    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/22222222222"
+    Then the response status code should be 200
+    And the response customer name should be "Ana"
+
+  Scenario: Get customer by formatted cpfCnpj returns customer after normalization
+    Given the customer database has customer id 7 name "Ana" and cpfCnpj "22222222222"
+    When I send GET request to "/api/financialtransaction/customers/cpfcnpj/222.222.222-22"
+    Then the response status code should be 200
+    And the response customer name should be "Ana"
+
   Scenario: Add customer publishes message through integration pipeline
     Given the customer queue is empty
     When I send POST request to "/api/financialtransaction/customers" with name "Joao" and cpfCnpj "529.982.247-25"

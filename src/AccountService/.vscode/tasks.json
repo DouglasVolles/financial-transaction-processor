@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "accountservice: kill stale process",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/src/AccountService/.vscode/kill-accountservice.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "accountservice: build",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/AccountService/AccountService.csproj"
+      ],
+      "problemMatcher": [
+        "$msCompile"
+      ]
+    },
+    {
+      "label": "accountservice: prepare launch",
+      "dependsOn": [
+        "accountservice: clean environment",
+        "accountservice: build"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "accountservice: clean environment",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$ids = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($ids) { foreach ($id in $ids) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }; sqllocaldb start mssqllocaldb | Out-Null"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "accountservice: run clean",
+      "type": "shell",
+      "dependsOn": [
+        "accountservice: prepare launch"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "dotnet run --project \"${workspaceFolder}/src/AccountService/AccountService.csproj\""
+      ],
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}
+

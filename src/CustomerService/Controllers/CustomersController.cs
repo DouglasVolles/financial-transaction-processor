@@ -71,6 +71,32 @@ public class CustomersController : ControllerBase
     }
 
     /// <summary>
+    /// Get a specific customer by CpfCnpj
+    /// </summary>
+    /// <param name="cpfCnpj">Customer CpfCnpj</param>
+    /// <returns>Customer details if found</returns>
+    [HttpGet("cpfcnpj/{cpfCnpj}")]
+    public async Task<ActionResult<CustomerResponse>> GetCustomerByCpfCnpj(string cpfCnpj)
+    {
+        var normalized = NormalizeCpfCnpj(cpfCnpj);
+        var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.CpfCnpj == normalized);
+        if (customer == null)
+        {
+            return NotFound($"Customer with CpfCnpj {cpfCnpj} not found");
+        }
+
+        var customerResponse = new CustomerResponse
+        {
+            Id = customer.Id,
+            Name = customer.Name,
+            CpfCnpj = customer.CpfCnpj,
+            CreatedAt = customer.CreatedAt
+        };
+
+        return Ok(customerResponse);
+    }
+
+    /// <summary>
     /// Get all customers
     /// </summary>
     /// <returns>List of all customers</returns>
@@ -88,4 +114,7 @@ public class CustomersController : ControllerBase
 
         return Ok(customersResponse);
     }
+
+    private static string NormalizeCpfCnpj(string value) =>
+        new(value.Where(char.IsDigit).ToArray());
 }

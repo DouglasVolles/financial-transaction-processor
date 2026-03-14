@@ -22,6 +22,7 @@ public sealed class CustomersControllerSteps
 
     private IActionResult _addResponse = null!;
     private ActionResult<CustomerResponse> _getByIdResponse = null!;
+    private ActionResult<CustomerResponse> _getByCpfCnpjResponse = null!;
     private ActionResult<List<CustomerResponse>> _getAllResponse = null!;
 
     [Given(@"a customers controller with a healthy queue service")]
@@ -102,6 +103,12 @@ public sealed class CustomersControllerSteps
         _getByIdResponse = await _controller.GetCustomer(id);
     }
 
+    [When(@"I get customer by cpfCnpj ""(.*)""")]
+    public async Task WhenIGetCustomerByCpfCnpj(string cpfCnpj)
+    {
+        _getByCpfCnpjResponse = await _controller.GetCustomerByCpfCnpj(cpfCnpj);
+    }
+
     [When(@"I get all customers")]
     public async Task WhenIGetAllCustomers()
     {
@@ -132,6 +139,25 @@ public sealed class CustomersControllerSteps
     public void ThenTheReturnedCustomerNameShouldBe(string expectedName)
     {
         var result = _getByIdResponse.Result as OkObjectResult;
+        result.Should().NotBeNull();
+
+        var payload = result!.Value as CustomerResponse;
+        payload.Should().NotBeNull();
+        payload!.Name.Should().Be(expectedName);
+    }
+
+    [Then(@"the get customer by cpfCnpj response status code should be (.*)")]
+    public void ThenTheGetCustomerByCpfCnpjResponseStatusCodeShouldBe(int statusCode)
+    {
+        var result = _getByCpfCnpjResponse.Result;
+        result.Should().NotBeNull();
+        GetStatusCode(result!).Should().Be(statusCode);
+    }
+
+    [Then("the returned customer by cpfCnpj name should be \"(.*)\"")]
+    public void ThenTheReturnedCustomerByCpfCnpjNameShouldBe(string expectedName)
+    {
+        var result = _getByCpfCnpjResponse.Result as OkObjectResult;
         result.Should().NotBeNull();
 
         var payload = result!.Value as CustomerResponse;

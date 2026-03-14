@@ -36,3 +36,14 @@ Feature: Customers controller
     When I get all customers
     Then the get all response status code should be 200
     And the returned customer count should be 0
+
+  Scenario: Get customer by cpfCnpj returns customer when found
+    Given a customers controller with seeded customer id 7 name "Ana" and cpfCnpj "22222222222"
+    When I get customer by cpfCnpj "222.222.222-22"
+    Then the get customer by cpfCnpj response status code should be 200
+    And the returned customer by cpfCnpj name should be "Ana"
+
+  Scenario: Get customer by cpfCnpj returns not found when missing
+    Given a customers controller with no customers
+    When I get customer by cpfCnpj "99999999999"
+    Then the get customer by cpfCnpj response status code should be 404

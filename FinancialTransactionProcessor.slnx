@@ -1,8 +1,11 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/AccountService/AccountService.csproj" />
     <Project Path="src/CustomerService/CustomerService.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/AccountService.UnitTests/AccountService.UnitTests.csproj" />
+    <Project Path="tests/AccountService.IntegrationTests/AccountService.IntegrationTests.csproj" />
     <Project Path="tests/CustomerService.UnitTests/CustomerService.UnitTests.csproj" />
     <Project Path="tests/CustomerService.IntegrationTests/CustomerService.IntegrationTests.csproj" />
   </Folder>
