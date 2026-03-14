@@ -30,9 +30,23 @@
       "label": "accountservice: prepare launch",
       "dependsOn": [
         "accountservice: clean environment",
-        "accountservice: build"
+        "accountservice: build",
+        "accountservice: open swagger"
       ],
       "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "accountservice: open swagger",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Start-Job -ScriptBlock { $url = 'http://localhost:5020/swagger/index.html'; for ($i = 0; $i -lt 60; $i++) { $conn = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue; if ($conn) { Start-Process $url; break }; Start-Sleep -Milliseconds 500 } } | Out-Null"
+      ],
       "problemMatcher": []
     },
     {
@@ -44,7 +58,7 @@
         "-ExecutionPolicy",
         "Bypass",
         "-Command",
-        "$ids = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($ids) { foreach ($id in $ids) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }; sqllocaldb start mssqllocaldb | Out-Null"
+        "& '${workspaceFolder}/src/AccountService/.vscode/kill-accountservice.ps1'; for ($i = 0; $i -lt 20; $i++) { $inUse = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue; if (-not $inUse) { break }; Start-Sleep -Milliseconds 250 }; sqllocaldb start mssqllocaldb | Out-Null"
       ],
       "problemMatcher": []
     },

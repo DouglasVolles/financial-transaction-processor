@@ -12,6 +12,8 @@
         "--urls",
         "http://localhost:5020"
       ],
+      "console": "internalConsole",
+      "internalConsoleOptions": "openOnSessionStart",
       "stopAtEntry": false,
       "env": {
         "ASPNETCORE_ENVIRONMENT": "Development",

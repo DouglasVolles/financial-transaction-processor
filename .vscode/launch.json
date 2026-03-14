@@ -52,9 +52,10 @@
   ],
   "compounds": [
     {
-      "name": "Start Customer Service",
+      "name": "Start Account + Customer Services",
       "configurations": [
-       "CustomerService (5019)"
+        "AccountService (5020)",
+        "CustomerService (5019)"
       ],
       "stopAll": true
     }

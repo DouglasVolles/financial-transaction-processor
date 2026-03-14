@@ -2,6 +2,40 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "clean: AccountService port",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "$ids = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($ids) { foreach ($id in $ids) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue } }; for ($i = 0; $i -lt 20; $i++) { $inUse = Get-NetTCPConnection -LocalPort 5020 -State Listen -ErrorAction SilentlyContinue; if (-not $inUse) { break }; Start-Sleep -Milliseconds 250 }; exit 0"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "build: AccountService",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/AccountService/AccountService.csproj"
+      ],
+      "problemMatcher": [
+        "$msCompile"
+      ]
+    },
+    {
+      "label": "prepare: AccountService",
+      "dependsOn": [
+        "clean: AccountService port",
+        "build: AccountService"
+      ],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
       "label": "clean: CustomerService port",
       "type": "shell",
       "command": "powershell",
