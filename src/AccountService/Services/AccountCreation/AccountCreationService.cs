@@ -57,8 +57,8 @@ public class AccountCreationService : IAccountCreationService
             .ToListAsync(cancellationToken);
 
         var maxNumericPart = identifications
-            .Where(static id => !string.IsNullOrWhiteSpace(id) && id.StartsWith("ACC-", StringComparison.OrdinalIgnoreCase))
-            .Select(static id => id[4..])
+            .Where(static identification => !string.IsNullOrWhiteSpace(identification) && identification.StartsWith("ACC-", StringComparison.OrdinalIgnoreCase))
+            .Select(static identification => identification[4..])
             .Select(static suffix => int.TryParse(suffix, out var number) ? number : 0)
             .DefaultIfEmpty(0)
             .Max();
