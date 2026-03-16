@@ -2,6 +2,32 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "open: AccountService Transactions page",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "Start-Process powershell -WindowStyle Hidden -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-Command','for ($i = 0; $i -lt 120; $i++) { try { $r = Invoke-WebRequest -Uri ''http://localhost:5020/swagger/index.html'' -UseBasicParsing -TimeoutSec 1 -ErrorAction Stop; if ($r.StatusCode -eq 200) { Start-Process ''http://localhost:5020/swagger/index.html#/Transaction''; break } } catch {} Start-Sleep -Milliseconds 500 }'; exit 0"
+      ],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "prepare: AccountService + open transactions",
+      "dependsOn": [
+        "prepare: AccountService",
+        "open: AccountService Transactions page"
+      ],
+      "dependsOrder": "parallel",
+      "problemMatcher": []
+    },
+    {
       "label": "clean: AccountService port",
       "type": "shell",
       "command": "powershell",

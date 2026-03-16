@@ -6,7 +6,12 @@ namespace AccountService.Services.Messaging;
 
 public interface IRabbitMqService
 {
-    void PublishMessage(object message, string queueName = "accounts");
+    void PublishMessage(
+        object message,
+        string queueName = "accounts",
+        string? exchangeName = null,
+        string? routingKey = null,
+        IDictionary<string, object>? headers = null);
     event EventHandler<string>? MessageReceived;
     void StartConsuming();
 }
@@ -46,20 +51,31 @@ public class RabbitMqService : IRabbitMqService, IDisposable
         }
     }
 
-    public void PublishMessage(object message, string queueName = "accounts")
+    public void PublishMessage(
+        object message,
+        string queueName = "accounts",
+        string? exchangeName = null,
+        string? routingKey = null,
+        IDictionary<string, object>? headers = null)
     {
         try
         {
             if (_channel == null) return;
 
-            _channel.ExchangeDeclare(_settings.ExchangeName, ExchangeType.Direct, durable: true);
+            var effectiveExchange = exchangeName ?? _settings.ExchangeName;
+            var effectiveRoutingKey = routingKey ?? _settings.RoutingKey;
+
+            _channel.ExchangeDeclare(effectiveExchange, ExchangeType.Direct, durable: true);
             _channel.QueueDeclare(queueName, durable: true, exclusive: false, autoDelete: false);
-            _channel.QueueBind(queueName, _settings.ExchangeName, _settings.RoutingKey);
+            _channel.QueueBind(queueName, effectiveExchange, effectiveRoutingKey);
 
             var json = JsonSerializer.Serialize(message);
             var body = System.Text.Encoding.UTF8.GetBytes(json);
+            var properties = _channel.CreateBasicProperties();
+            properties.Persistent = true;
+            properties.Headers = headers;
 
-            _channel.BasicPublish(_settings.ExchangeName, _settings.RoutingKey, null, body);
+            _channel.BasicPublish(effectiveExchange, effectiveRoutingKey, properties, body);
         }
         catch (Exception ex)
         {

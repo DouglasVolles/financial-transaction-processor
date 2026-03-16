@@ -5,6 +5,7 @@ using AccountService.Services.Consumers;
 using AccountService.Services.AccountCreation;
 using AccountService.Services.CustomerLookup;
 using AccountService.Services.Messaging;
+using AccountService.Services.Transactions;
 using AccountService.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ builder.Services.AddSwaggerGen();
 
 // FluentValidation Configuration
 builder.Services.AddScoped<IValidator<AccountRequest>, AccountRequestValidator>();
+builder.Services.AddScoped<IValidator<TransactionRequest>, TransactionRequestValidator>();
 
 // Entity Framework Configuration
 var connectionString = builder.Configuration.GetConnectionString("AccountDatabase");
@@ -44,9 +46,11 @@ builder.Services.AddHttpClient<ICustomerLookupService, CustomerLookupService>(cl
 
 builder.Services.AddScoped<IAccountFactory, AccountFactory>();
 builder.Services.AddScoped<IAccountCreationService, AccountCreationService>();
+builder.Services.AddScoped<ITransactionProcessor, TransactionProcessor>();
 
 // Background Services
 builder.Services.AddHostedService<AccountConsumerService>();
+builder.Services.AddHostedService<TransactionConsumerService>();
 
 var app = builder.Build();
 

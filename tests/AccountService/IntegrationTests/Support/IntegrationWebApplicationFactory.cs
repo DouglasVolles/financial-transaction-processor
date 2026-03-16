@@ -30,6 +30,14 @@ public sealed class IntegrationWebApplicationFactory : WebApplicationFactory<Pro
                 services.Remove(hostedServiceDescriptor);
             }
 
+            var transactionHostedServiceDescriptor = services.SingleOrDefault(d =>
+                d.ServiceType == typeof(IHostedService) && d.ImplementationType == typeof(TransactionConsumerService));
+
+            if (transactionHostedServiceDescriptor is not null)
+            {
+                services.Remove(transactionHostedServiceDescriptor);
+            }
+
             services.RemoveAll(typeof(DbContextOptions<AccountDbContext>));
             services.RemoveAll(typeof(IDbContextOptionsConfiguration<AccountDbContext>));
             services.RemoveAll(typeof(AccountDbContext));
