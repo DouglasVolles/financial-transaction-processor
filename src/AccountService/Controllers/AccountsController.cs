@@ -53,9 +53,12 @@ public class AccountsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<AccountResponse>> GetAccount(int id)
     {
+        _logger.LogInformation("Getting account by id. AccountId={AccountId}", id);
+
         var account = await _dbContext.Accounts.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         if (account == null)
         {
+            _logger.LogWarning("Account not found. AccountId={AccountId}", id);
             return NotFound($"Account with ID {id} not found");
         }
 
@@ -70,6 +73,8 @@ public class AccountsController : ControllerBase
             AccountStatus = account.AccountStatus
         };
 
+        _logger.LogInformation("Account found. AccountId={AccountId}, Identification={Identification}", account.Id, account.Identification);
+
         return Ok(accountResponse);
     }
 
@@ -80,6 +85,8 @@ public class AccountsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<AccountResponse>>> GetAllAccounts()
     {
+        _logger.LogInformation("Getting all accounts.");
+
         var accounts = await _dbContext.Accounts.AsNoTracking().ToListAsync();
         var accountsResponse = accounts.Select(account => new AccountResponse
         {
@@ -91,6 +98,8 @@ public class AccountsController : ControllerBase
             CreditLimit = account.CreditLimit,
             AccountStatus = account.AccountStatus
         }).ToList();
+
+        _logger.LogInformation("Accounts retrieved successfully. Count={Count}", accountsResponse.Count);
 
         return Ok(accountsResponse);
     }

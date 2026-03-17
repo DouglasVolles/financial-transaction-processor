@@ -31,6 +31,8 @@ public class TransactionController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<TransactionResponse>>> Get()
     {
+        _logger.LogInformation("Getting transactions list.");
+
         var transactions = await _dbContext.Transactions
             .AsNoTracking()
             .OrderByDescending(t => t.Timestamp)
@@ -47,18 +49,28 @@ public class TransactionController : ControllerBase
             ErrorMessage = transaction.ErrorMessage
         }).ToList();
 
+        _logger.LogInformation("Transactions retrieved successfully. Count={Count}", response.Count);
+
         return Ok(response);
     }
 
     [HttpPost]
     public async Task<ActionResult<TransactionResponse>> AddTransaction([FromBody] TransactionRequest request)
     {
+        _logger.LogInformation(
+            "Received transaction request. ReferenceId={ReferenceId}, Operation={Operation}, AccountId={AccountId}",
+            request.ReferenceId,
+            request.Operation,
+            request.AccountId);
+
         var transaction = await _dbContext.Transactions
             .AsNoTracking()
             .FirstOrDefaultAsync(t => t.ReferenceId == request.ReferenceId);
 
         if (transaction is not null)
         {
+            _logger.LogInformation("Duplicate transaction request detected. ReferenceId={ReferenceId}", request.ReferenceId);
+
             return Ok(new TransactionResponse
             {
                 TransactionId = $"{transaction.ReferenceId}-PROCESSED",

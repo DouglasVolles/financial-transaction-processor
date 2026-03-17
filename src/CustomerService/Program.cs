@@ -7,6 +7,7 @@ using CustomerService.Services.Messaging;
 using CustomerService.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,16 @@ builder.Services.AddControllers(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddHttpClientInstrumentation()
+            .AddRuntimeInstrumentation()
+            .AddOtlpExporter();
+    });
 
 // FluentValidation Configuration
 builder.Services.AddScoped<IValidator<CustomerRequest>, CustomerRequestValidator>();

@@ -35,12 +35,15 @@ public class CustomersController : ControllerBase
         try
         {
             _rabbitMqService.PublishMessage(customerRequest, "customer");
-            _logger.LogInformation($"New customer request added to queue: {customerRequest.Name} - {customerRequest.CpfCnpj}");
+            _logger.LogInformation(
+                "New customer request added to queue. Name={Name}, CpfCnpj={CpfCnpj}",
+                customerRequest.Name,
+                customerRequest.CpfCnpj);
             return Ok("New customer request successfully added to queue");
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error adding new customer to queue: {ex.Message}");
+            _logger.LogError(ex, "Error adding new customer to queue");
             return StatusCode(500, "Error adding new customer to queue");
         }
     }
@@ -53,9 +56,12 @@ public class CustomersController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerResponse>> GetCustomer(int id)
     {
+        _logger.LogInformation("Getting customer by id. CustomerId={CustomerId}", id);
+
         var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Id == id);
         if (customer == null)
         {
+            _logger.LogWarning("Customer not found by id. CustomerId={CustomerId}", id);
             return NotFound($"Customer with ID {id} not found");
         }
 
@@ -66,6 +72,8 @@ public class CustomersController : ControllerBase
             CpfCnpj = customer.CpfCnpj,
             CreatedAt = customer.CreatedAt
         };
+
+        _logger.LogInformation("Customer found by id. CustomerId={CustomerId}", customer.Id);
 
         return Ok(customerResponse);
     }
@@ -78,10 +86,13 @@ public class CustomersController : ControllerBase
     [HttpGet("cpfcnpj/{cpfCnpj}")]
     public async Task<ActionResult<CustomerResponse>> GetCustomerByCpfCnpj(string cpfCnpj)
     {
+        _logger.LogInformation("Getting customer by document. CpfCnpj={CpfCnpj}", cpfCnpj);
+
         var normalized = NormalizeCpfCnpj(cpfCnpj);
         var customer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.CpfCnpj == normalized);
         if (customer == null)
         {
+            _logger.LogWarning("Customer not found by document. CpfCnpj={CpfCnpj}", cpfCnpj);
             return NotFound($"Customer with CpfCnpj {cpfCnpj} not found");
         }
 
@@ -93,6 +104,8 @@ public class CustomersController : ControllerBase
             CreatedAt = customer.CreatedAt
         };
 
+        _logger.LogInformation("Customer found by document. CustomerId={CustomerId}", customer.Id);
+
         return Ok(customerResponse);
     }
 
@@ -103,6 +116,8 @@ public class CustomersController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<List<CustomerResponse>>> GetAllCustomers()
     {
+        _logger.LogInformation("Getting all customers.");
+
         var customers = await _dbContext.Customers.AsNoTracking().ToListAsync();
         var customersResponse = customers.Select(customer => new CustomerResponse
         {
@@ -111,6 +126,8 @@ public class CustomersController : ControllerBase
             CpfCnpj = customer.CpfCnpj,
             CreatedAt = customer.CreatedAt
         }).ToList();
+
+        _logger.LogInformation("Customers retrieved successfully. Count={Count}", customersResponse.Count);
 
         return Ok(customersResponse);
     }

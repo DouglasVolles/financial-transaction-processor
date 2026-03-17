@@ -24,10 +24,15 @@ public sealed class CustomerLookupService : ICustomerLookupService
 
             if (customers is null)
             {
+                _logger.LogWarning("Customer lookup returned no data from CustomerService.");
                 return null;
             }
 
             var match = customers.FirstOrDefault(c => NormalizeCpFCnpj(c.CpfCnpj) == normalizedTarget);
+            if (match is null)
+            {
+                _logger.LogInformation("Customer lookup did not find a matching customer.");
+            }
             return match?.Id;
         }
         catch (Exception ex)
