@@ -62,6 +62,8 @@ builder.Services.AddHostedService<CustomerConsumerService>();
 
 var app = builder.Build();
 
+await ApplyMigrationsWithRetryAsync(app.Services, app.Logger, app.Lifetime.ApplicationStopping);
+
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
@@ -85,6 +87,41 @@ app.MapHealthChecks("/health/ready", new HealthCheckOptions
 });
 
 app.Run();
+
+static async Task ApplyMigrationsWithRetryAsync(
+    IServiceProvider services,
+    ILogger logger,
+    CancellationToken cancellationToken)
+{
+    const int maxAttempts = 10;
+
+    for (var attempt = 1; attempt <= maxAttempts; attempt++)
+    {
+        try
+        {
+            using var scope = services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<CustomerDbContext>();
+            await dbContext.Database.MigrateAsync(cancellationToken);
+
+            logger.LogInformation("CustomerService database migrations applied successfully.");
+            return;
+        }
+        catch (Exception ex) when (attempt < maxAttempts)
+        {
+            logger.LogWarning(
+                ex,
+                "Failed to apply CustomerService migrations on attempt {Attempt}/{MaxAttempts}. Retrying in 3 seconds.",
+                attempt,
+                maxAttempts);
+
+            await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
+        }
+    }
+
+    using var finalScope = services.CreateScope();
+    var finalDbContext = finalScope.ServiceProvider.GetRequiredService<CustomerDbContext>();
+    await finalDbContext.Database.MigrateAsync(cancellationToken);
+}
 
 public partial class Program
 {
