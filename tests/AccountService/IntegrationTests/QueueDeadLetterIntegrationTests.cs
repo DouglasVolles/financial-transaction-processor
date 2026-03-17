@@ -51,7 +51,7 @@ public class QueueDeadLetterIntegrationTests
         {
             try
             {
-                using var response = await client.GetAsync("/api/financialtransaction/transations");
+                using var response = await client.GetAsync("/api/financialtransaction/transactions");
                 return response.StatusCode is HttpStatusCode.OK;
             }
             catch

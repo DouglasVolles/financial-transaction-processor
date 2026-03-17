@@ -164,8 +164,6 @@ Observação:
 
 ## Exemplos de uso da API
 
-Importante: no projeto atual, a rota de transações está como transations (sem o segundo "c"), para manter compatibilidade com o código existente.
-
 ### 1) Criar cliente
 
 bash
@@ -194,7 +192,7 @@ curl -X POST http://localhost:5020/api/financialtransaction/accounts \
 ### 3) Enfileirar crédito
 
 bash
-curl -X POST http://localhost:5020/api/financialtransaction/transations \
+curl -X POST http://localhost:5020/api/financialtransaction/transactions \
   -H "Content-Type: application/json" \
   -d '{
     "operation": "Credit",
@@ -208,7 +206,7 @@ curl -X POST http://localhost:5020/api/financialtransaction/transations \
 ### 4) Enfileirar reserva
 
 bash
-curl -X POST http://localhost:5020/api/financialtransaction/transations \
+curl -X POST http://localhost:5020/api/financialtransaction/transactions \
   -H "Content-Type: application/json" \
   -d '{
     "operation": "Reserve",
@@ -222,7 +220,7 @@ curl -X POST http://localhost:5020/api/financialtransaction/transations \
 ### 5) Enfileirar transferência
 
 bash
-curl -X POST http://localhost:5020/api/financialtransaction/transations \
+curl -X POST http://localhost:5020/api/financialtransaction/transactions \
   -H "Content-Type: application/json" \
   -d '{
     "operation": "Transfer",
@@ -237,7 +235,7 @@ curl -X POST http://localhost:5020/api/financialtransaction/transations \
 ### 6) Consultar transações processadas
 
 bash
-curl -X GET http://localhost:5020/api/financialtransaction/transations
+curl -X GET http://localhost:5020/api/financialtransaction/transactions
 
 
 ## Execução de testes por escopo

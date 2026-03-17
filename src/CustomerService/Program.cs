@@ -93,15 +93,25 @@ static async Task ApplyMigrationsWithRetryAsync(
     ILogger logger,
     CancellationToken cancellationToken)
 {
+    using var scope = services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<CustomerDbContext>();
+    
+    // Skip migrations for non-relational databases (e.g., in-memory for testing)
+    if (!dbContext.Database.IsRelational())
+    {
+        logger.LogInformation("CustomerService using non-relational database. Skipping migrations.");
+        return;
+    }
+
     const int maxAttempts = 10;
 
     for (var attempt = 1; attempt <= maxAttempts; attempt++)
     {
         try
         {
-            using var scope = services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<CustomerDbContext>();
-            await dbContext.Database.MigrateAsync(cancellationToken);
+            using var retryScope = services.CreateScope();
+            var retryDbContext = retryScope.ServiceProvider.GetRequiredService<CustomerDbContext>();
+            await retryDbContext.Database.MigrateAsync(cancellationToken);
 
             logger.LogInformation("CustomerService database migrations applied successfully.");
             return;

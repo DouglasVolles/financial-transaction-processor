@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AccountService.Controllers;
 
 [ApiController]
-[Route("api/financialtransaction/transations")]
+[Route("api/financialtransaction/transactions")]
 public class TransactionController : ControllerBase
 {
     private const string TransactionsQueue = "transactions";
