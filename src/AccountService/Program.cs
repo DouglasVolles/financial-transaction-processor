@@ -1,5 +1,6 @@
 using AccountService.Data;
 using AccountService.Filters;
+using AccountService.HealthChecks;
 using AccountService.Models;
 using AccountService.Services.Consumers;
 using AccountService.Services.AccountCreation;
@@ -9,6 +10,7 @@ using AccountService.Services.Transactions;
 using AccountService.Services.Transactions.Rules;
 using AccountService.Validators;
 using FluentValidation;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using OpenTelemetry.Metrics;
 
@@ -21,6 +23,9 @@ builder.Services.AddControllers(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "live" })
+    .AddCheck<AccountDatabaseHealthCheck>("database", tags: new[] { "ready" });
 
 builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
@@ -86,6 +91,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("live")
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = registration => registration.Tags.Contains("ready")
+});
 
 app.Run();
 
