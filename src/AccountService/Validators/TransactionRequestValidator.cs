@@ -34,5 +34,12 @@ public class TransactionRequestValidator : AbstractValidator<TransactionRequest>
             .WithMessage("ReferenceId is required")
             .MaximumLength(250)
             .WithMessage("ReferenceId must be at most 250 characters");
+
+        RuleFor(x => x.DestinationAccountId)
+            .NotEmpty()
+            .WithMessage("DestinationAccountId is required for transfer operations")
+            .MaximumLength(100)
+            .WithMessage("DestinationAccountId must be at most 100 characters")
+            .When(x => x.Operation == TransactionOperation.Transfer);
     }
 }

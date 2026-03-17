@@ -6,6 +6,7 @@ using AccountService.Services.AccountCreation;
 using AccountService.Services.CustomerLookup;
 using AccountService.Services.Messaging;
 using AccountService.Services.Transactions;
+using AccountService.Services.Transactions.Rules;
 using AccountService.Validators;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -46,6 +47,13 @@ builder.Services.AddHttpClient<ICustomerLookupService, CustomerLookupService>(cl
 
 builder.Services.AddScoped<IAccountFactory, AccountFactory>();
 builder.Services.AddScoped<IAccountCreationService, AccountCreationService>();
+builder.Services.AddScoped<CreditTransactionRuleHandler>();
+builder.Services.AddScoped<DebitTransactionRuleHandler>();
+builder.Services.AddScoped<ReserveTransactionRuleHandler>();
+builder.Services.AddScoped<CaptureTransactionRuleHandler>();
+builder.Services.AddScoped<ReversalTransactionRuleHandler>();
+builder.Services.AddScoped<TransferTransactionRuleHandler>();
+builder.Services.AddScoped<ITransactionRuleEngine, TransactionRuleEngine>();
 builder.Services.AddScoped<ITransactionProcessor, TransactionProcessor>();
 
 // Background Services

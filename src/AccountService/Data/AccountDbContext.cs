@@ -41,7 +41,10 @@ public class AccountDbContext : DbContext
                 .IsRequired()
                 .HasMaxLength(20);
             entity.Property(e => e.AccountIdentification).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.DestinationAccountIdentification).HasMaxLength(100);
             entity.Property(e => e.Amount).HasColumnType("decimal(18,2)");
+            entity.Property(e => e.AvailableBalance).HasColumnType("decimal(18,2)").HasDefaultValue(0m);
+            entity.Property(e => e.ReservedBalance).HasColumnType("decimal(18,2)").HasDefaultValue(0m);
             entity.Property(e => e.Currency).IsRequired().HasMaxLength(3);
             entity.Property(e => e.ReferenceId).IsRequired().HasMaxLength(250);
             entity.Property(e => e.Metadata).HasColumnType("nvarchar(max)");
@@ -55,10 +58,17 @@ public class AccountDbContext : DbContext
             entity.Property(e => e.Timestamp).IsRequired();
             entity.HasIndex(e => e.ReferenceId).IsUnique();
             entity.HasIndex(e => e.AccountIdentification);
+            entity.HasIndex(e => e.DestinationAccountIdentification);
 
             entity.HasOne<Account>()
                 .WithMany()
                 .HasForeignKey(e => e.AccountIdentification)
+                .HasPrincipalKey(a => a.Identification)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne<Account>()
+                .WithMany()
+                .HasForeignKey(e => e.DestinationAccountIdentification)
                 .HasPrincipalKey(a => a.Identification)
                 .OnDelete(DeleteBehavior.Restrict);
 

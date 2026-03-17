@@ -40,9 +40,9 @@ public class TransactionController : ControllerBase
         {
             TransactionId = $"{transaction.ReferenceId}-PROCESSED",
             Status = transaction.Status,
-            Balance = 0,
-            ReservedBalance = 0,
-            AvailableBalance = 0,
+            Balance = ToCents(transaction.AvailableBalance + transaction.ReservedBalance),
+            ReservedBalance = ToCents(transaction.ReservedBalance),
+            AvailableBalance = ToCents(transaction.AvailableBalance),
             Timestamp = transaction.Timestamp,
             ErrorMessage = transaction.ErrorMessage
         }).ToList();
@@ -63,9 +63,9 @@ public class TransactionController : ControllerBase
             {
                 TransactionId = $"{transaction.ReferenceId}-PROCESSED",
                 Status = transaction.Status,
-                Balance = 0,
-                ReservedBalance = 0,
-                AvailableBalance = 0,
+                Balance = ToCents(transaction.AvailableBalance + transaction.ReservedBalance),
+                ReservedBalance = ToCents(transaction.ReservedBalance),
+                AvailableBalance = ToCents(transaction.AvailableBalance),
                 Timestamp = transaction.Timestamp,
                 ErrorMessage = transaction.ErrorMessage
             });
@@ -90,4 +90,6 @@ public class TransactionController : ControllerBase
             ErrorMessage = null
         });
     }
+
+    private static long ToCents(decimal value) => (long)Math.Round(value * 100m, MidpointRounding.AwayFromZero);
 }

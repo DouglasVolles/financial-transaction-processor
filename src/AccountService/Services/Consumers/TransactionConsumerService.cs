@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Globalization;
 using AccountService.Models;
 using AccountService.Services.Messaging;
 using AccountService.Services.Transactions;
@@ -233,21 +234,53 @@ public sealed class TransactionConsumerService : BackgroundService
             return 0;
         }
 
-        return value switch
+        if (TryParseRetryCount(value, out var retryCount))
         {
-            byte[] bytes when int.TryParse(Encoding.UTF8.GetString(bytes), out var parsed) => parsed,
-            ReadOnlyMemory<byte> memory when int.TryParse(Encoding.UTF8.GetString(memory.Span), out var parsed) => parsed,
-            string text when int.TryParse(text, out var parsed) => parsed,
-            byte parsed => parsed,
-            sbyte parsed => parsed,
-            short parsed => parsed,
-            ushort parsed => parsed,
-            int parsed => parsed,
-            uint parsed => (int)parsed,
-            long parsed => (int)parsed,
-            ulong parsed => (int)parsed,
-            _ => 0
-        };
+            return Math.Max(0, retryCount);
+        }
+
+        return 0;
+    }
+
+    private static bool TryParseRetryCount(object value, out int retryCount)
+    {
+        switch (value)
+        {
+            case byte[] bytes:
+                return int.TryParse(
+                    Encoding.UTF8.GetString(bytes),
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out retryCount);
+
+            case ReadOnlyMemory<byte> memory:
+                return int.TryParse(
+                    Encoding.UTF8.GetString(memory.Span),
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out retryCount);
+
+            case string text:
+                return int.TryParse(
+                    text,
+                    NumberStyles.Integer,
+                    CultureInfo.InvariantCulture,
+                    out retryCount);
+
+            case IConvertible convertible:
+                try
+                {
+                    retryCount = convertible.ToInt32(CultureInfo.InvariantCulture);
+                    return true;
+                }
+                catch
+                {
+                    break;
+                }
+        }
+
+        retryCount = 0;
+        return false;
     }
 
     public override void Dispose()

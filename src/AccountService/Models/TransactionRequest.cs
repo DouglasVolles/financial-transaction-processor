@@ -12,6 +12,9 @@ public class TransactionRequest
     [JsonPropertyName("account_id")]
     public string AccountId { get; set; } = string.Empty;
 
+    [JsonPropertyName("destination_account_id")]
+    public string? DestinationAccountId { get; set; }  = string.Empty;
+
     [JsonPropertyName("amount")]
     public int Amount { get; set; }
 
