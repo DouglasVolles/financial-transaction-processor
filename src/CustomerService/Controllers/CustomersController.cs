@@ -30,6 +30,8 @@ public class CustomersController : ControllerBase
     /// <param name="customerRequest">Customer data: Name and CpfCnpj</param>
     /// <returns>OK if the request was successfully added to the queue</returns>
     [HttpPost]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public IActionResult AddCustomer([FromBody] CustomerRequest customerRequest)
     {
         try
@@ -54,6 +56,8 @@ public class CustomersController : ControllerBase
     /// <param name="id">Customer ID</param>
     /// <returns>Customer details if found</returns>
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CustomerResponse>> GetCustomer(int id)
     {
         _logger.LogInformation("Getting customer by id. CustomerId={CustomerId}", id);
@@ -84,6 +88,8 @@ public class CustomersController : ControllerBase
     /// <param name="cpfCnpj">Customer CpfCnpj</param>
     /// <returns>Customer details if found</returns>
     [HttpGet("cpfcnpj/{cpfCnpj}")]
+    [ProducesResponseType(typeof(CustomerResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CustomerResponse>> GetCustomerByCpfCnpj(string cpfCnpj)
     {
         _logger.LogInformation("Getting customer by document. CpfCnpj={CpfCnpj}", cpfCnpj);
@@ -114,6 +120,7 @@ public class CustomersController : ControllerBase
     /// </summary>
     /// <returns>List of all customers</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(List<CustomerResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<CustomerResponse>>> GetAllCustomers()
     {
         _logger.LogInformation("Getting all customers.");

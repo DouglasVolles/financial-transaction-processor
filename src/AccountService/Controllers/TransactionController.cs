@@ -28,7 +28,12 @@ public class TransactionController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary>
+    /// Retrieves all processed transactions sorted by latest timestamp.
+    /// </summary>
+    /// <returns>List of transactions with computed balances in cents.</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(List<TransactionResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<TransactionResponse>>> Get()
     {
         _logger.LogInformation("Getting transactions list.");
@@ -54,7 +59,14 @@ public class TransactionController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary>
+    /// Submits a transaction for asynchronous processing.
+    /// </summary>
+    /// <param name="request">Transaction payload with operation, account id, amount and reference id.</param>
+    /// <returns>Pending transaction response or previously processed response for duplicate reference id.</returns>
     [HttpPost]
+    [ProducesResponseType(typeof(TransactionResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<TransactionResponse>> AddTransaction([FromBody] TransactionRequest request)
     {
         _logger.LogInformation(

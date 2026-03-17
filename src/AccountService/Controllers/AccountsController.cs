@@ -30,6 +30,8 @@ public class AccountsController : ControllerBase
     /// <param name="accountRequest">Account data: customer id, balances, credit limit and status</param>
     /// <returns>OK if the request was successfully added to the queue</returns>
     [HttpPost]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public IActionResult AddAccount([FromBody] AccountRequest accountRequest)
     {
         try
@@ -51,6 +53,8 @@ public class AccountsController : ControllerBase
     /// <param name="id">Account ID</param>
     /// <returns>Account details if found</returns>
     [HttpGet("{id}")]
+    [ProducesResponseType(typeof(AccountResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<AccountResponse>> GetAccount(int id)
     {
         _logger.LogInformation("Getting account by id. AccountId={AccountId}", id);
@@ -83,6 +87,7 @@ public class AccountsController : ControllerBase
     /// </summary>
     /// <returns>List of all accounts</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(List<AccountResponse>), StatusCodes.Status200OK)]
     public async Task<ActionResult<List<AccountResponse>>> GetAllAccounts()
     {
         _logger.LogInformation("Getting all accounts.");
